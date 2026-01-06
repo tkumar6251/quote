@@ -24,6 +24,23 @@ export async function POST(req) {
             prompt = `Generate a JSON array of 4-5 key modules for a software project titled "${projectTitle}". 
       Format: [{"title": "Module Name", "details": "Brief features"}]. 
       Do NOT include markdown formatting or backticks. Return ONLY the raw JSON.`;
+        } else if (type === 'sow_overview') {
+            prompt = `Act as a Senior Project Manager. Write a professional "Project Overview" for a Statement of Work (SOW) titled "${projectTitle}". 
+      Describe the project goals and high-level objectives clearly. 
+      Keep it between 80-100 words. Professional and authoritative tone.`;
+        } else if (type === 'sow_deliverables') {
+            prompt = `Generate a JSON array of 5-6 key deliverables for a Statement of Work (SOW) titled "${projectTitle}". 
+      Format: [{"item": "Deliverable Name", "description": "What will be delivered"}]. 
+      Do NOT include markdown formatting or backticks. Return ONLY the raw JSON.`;
+        } else if (type === 'sow_milestones') {
+            prompt = `Generate a JSON array of 4-5 project milestones for a Statement of Work (SOW) titled "${projectTitle}". 
+      Format: [{"milestone": "Phase/Event", "timeline": "e.g. Week 4", "criteria": "Success criteria"}]. 
+      Do NOT include markdown formatting or backticks. Return ONLY the raw JSON.`;
+        } else if (type === 'msa_clauses') {
+            prompt = `Generate a JSON object containing standard Master Service Agreement (MSA) clauses for a software project titled "${projectTitle}".
+      Include the following keys: "governingLaw" (string), "disputeResolution" (string), "termination" (string), "confidentiality" (string), "liability" (string). 
+      Make the content professional, standard, and legally formal.
+      Do NOT include markdown formatting or backticks. Return ONLY the raw JSON.`;
         }
 
         const result = await model.generateContent(prompt);

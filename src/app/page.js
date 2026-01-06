@@ -145,45 +145,7 @@ export default function Home() {
     const modCount = modules.length;
     const token = `${dd}${cInit}${pInit}${mm}K${yy}${modCount}`;
 
-    // --- Watermark Image ---
-    try {
-      // Load the new JPG image
-      const watermarkData = await getImageBase64('/watermark.jpg');
-      const pageWidth = doc.internal.pageSize.width || doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
 
-      const imgProps = doc.getImageProperties(watermarkData);
-      // Scale to 40% of page width (SMALLER)
-      const pdfWidth = pageWidth * 0.4;
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      // Apply Opacity and Rotation
-      doc.saveGraphicsState();
-      doc.setGState(new doc.GState({ opacity: 1.0 }));
-
-      // Matrix Transformation for 45-degree rotation around the center
-      const angle = 45;
-      const rad = angle * (Math.PI / 180);
-      const cos = Math.cos(rad);
-      const sin = Math.sin(rad);
-
-      doc.setCurrentTransformationMatrix({
-        a: cos,
-        b: sin,
-        c: -sin,
-        d: cos,
-        e: pageWidth / 2,
-        f: pageHeight / 2
-      });
-
-      // Draw image centered at (0,0) of the rotated coordinate system
-      doc.addImage(watermarkData, 'JPEG', -pdfWidth / 2, -pdfHeight / 2, pdfWidth, pdfHeight, 'watermark', 'FAST');
-
-      doc.restoreGraphicsState();
-
-    } catch (e) {
-      console.error("Watermark failed to load", e);
-    }
 
     // --- Apple Theme Styles ---
     const primaryColor = [30, 30, 30]; // Nearly black
@@ -402,231 +364,239 @@ export default function Home() {
       <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-blue-200/40 blur-[120px] rounded-full animate-blob"></div>
       <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-purple-200/40 blur-[120px] rounded-full animate-blob animation-delay-2000"></div>
 
-      <div className="w-full px-6 py-12 flex flex-col md:flex-row gap-10 items-start">
+      <div className="w-full px-6 py-12 flex flex-col items-center">
+        {/* Navigation */}
+        <div className="mb-8 flex gap-4">
+          <button className="px-6 py-2 rounded-full bg-slate-900 text-white text-sm font-bold shadow-lg">Quotation</button>
+          <a href="/sow" className="px-6 py-2 rounded-full bg-white/40 backdrop-blur-md border border-white/60 text-sm font-bold hover:bg-white/60 transition-all">SOW Generator</a>
+          <a href="/msa" className="px-6 py-2 rounded-full bg-white/40 backdrop-blur-md border border-white/60 text-sm font-bold hover:bg-white/60 transition-all">MSA Generator</a>
+        </div>
+
+        <div className="w-full flex flex-col md:flex-row gap-10 items-start">
 
 
-        {/* Glassmorphism Form Card */}
-        <div className="flex-1 bg-white/60 backdrop-blur-2xl rounded-3xl border border-white/60 shadow-xl p-8 md:p-10 animate-fade-in">
+          {/* Glassmorphism Form Card */}
+          <div className="flex-1 bg-white/60 backdrop-blur-2xl rounded-3xl border border-white/60 shadow-xl p-8 md:p-10 animate-fade-in">
 
-          <div className="mb-8 border-b border-gray-200/50 pb-6 flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold tracking-tight text-slate-800">Quotation</h1>
-              <p className="text-slate-500 mt-1">Generate a contract-ready document in seconds.</p>
-            </div>
-            {/* Provider Badge & Upload */}
-            <div className="hidden md:flex flex-col items-end gap-2">
-              <div className="text-right">
-                <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Provider</div>
-                <div className="font-bold text-slate-700">{PROVIDER.name}</div>
-              </div>
-
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileUpload}
-                className="hidden"
-                accept=".pdf,.docx"
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-full transition-all border border-indigo-200"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
-                Upload PRD (PDF/DOCX)
-              </button>
-            </div>
-          </div>
-
-          <form onSubmit={handleGenerate} className="space-y-8">
-
-            {/* Client & Project */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="group">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Client Name</label>
-                <input
-                  className="w-full bg-white/50 border border-transparent focus:border-blue-400/50 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium placeholder-slate-400"
-                  value={clientName}
-                  onChange={e => setClientName(e.target.value)}
-                  placeholder="Client Company Name"
-                />
-              </div>
+            <div className="mb-8 border-b border-gray-200/50 pb-6 flex justify-between items-center">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Client Email</label>
-                <input
-                  className="w-full bg-white/50 border border-transparent focus:border-blue-400/50 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium placeholder-slate-400"
-                  value={clientEmail}
-                  onChange={e => setClientEmail(e.target.value)}
-                  placeholder="client@company.com"
-                />
+                <h1 className="text-3xl font-bold tracking-tight text-slate-800">Quotation</h1>
+                <p className="text-slate-500 mt-1">Generate a contract-ready document in seconds.</p>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Project Title</label>
-                <input
-                  className="w-full bg-white/50 border border-transparent focus:border-blue-400/50 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium placeholder-slate-400"
-                  value={projectTitle}
-                  onChange={e => setProjectTitle(e.target.value)}
-                  placeholder="e.g. Mobile App MVP"
-                />
-              </div>
-            </div>
+              {/* Provider Badge & Upload */}
+              <div className="hidden md:flex flex-col items-end gap-2">
+                <div className="text-right">
+                  <div className="text-xs font-bold text-slate-400 uppercase tracking-wider">Provider</div>
+                  <div className="font-bold text-slate-700">{PROVIDER.name}</div>
+                </div>
 
-            {/* Scope */}
-            <div>
-              <div className="flex justify-between items-center mb-2 ml-1">
-                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Project Scope</label>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileUpload}
+                  className="hidden"
+                  accept=".pdf,.docx"
+                />
                 <button
                   type="button"
-                  onClick={generateScope}
-                  className="flex items-center gap-1 text-xs font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-colors"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex items-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-full transition-all border border-indigo-200"
                 >
-                  <span>✨ AI Generate</span>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
+                  Upload PRD (PDF/DOCX)
                 </button>
               </div>
-              <textarea
-                className="w-full bg-white/50 border border-transparent focus:border-blue-400/50 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium placeholder-slate-400 min-h-[100px]"
-                value={scope}
-                onChange={e => setScope(e.target.value)}
-              />
             </div>
 
-            {/* Modules */}
-            <div className="bg-slate-50/50 rounded-2xl p-6 border border-white/60">
-              <div className="flex justify-between items-center mb-4">
-                <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Modules</label>
-                <div className="flex gap-2">
+            <form onSubmit={handleGenerate} className="space-y-8">
+
+              {/* Client & Project */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="group">
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Client Name</label>
+                  <input
+                    className="w-full bg-white/50 border border-transparent focus:border-blue-400/50 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium placeholder-slate-400"
+                    value={clientName}
+                    onChange={e => setClientName(e.target.value)}
+                    placeholder="Client Company Name"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Client Email</label>
+                  <input
+                    className="w-full bg-white/50 border border-transparent focus:border-blue-400/50 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium placeholder-slate-400"
+                    value={clientEmail}
+                    onChange={e => setClientEmail(e.target.value)}
+                    placeholder="client@company.com"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2 ml-1">Project Title</label>
+                  <input
+                    className="w-full bg-white/50 border border-transparent focus:border-blue-400/50 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium placeholder-slate-400"
+                    value={projectTitle}
+                    onChange={e => setProjectTitle(e.target.value)}
+                    placeholder="e.g. Mobile App MVP"
+                  />
+                </div>
+              </div>
+
+              {/* Scope */}
+              <div>
+                <div className="flex justify-between items-center mb-2 ml-1">
+                  <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">Project Scope</label>
                   <button
                     type="button"
-                    onClick={generateModules}
-                    className="flex items-center gap-1 text-xs font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors"
+                    onClick={generateScope}
+                    className="flex items-center gap-1 text-xs font-bold text-purple-600 bg-purple-50 hover:bg-purple-100 px-3 py-1.5 rounded-lg transition-colors"
                   >
-                    <span>✨ AI Suggest</span>
-                  </button>
-                  <button type="button" onClick={addModule} className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
-                    + Add Module
+                    <span>✨ AI Generate</span>
                   </button>
                 </div>
-              </div>
-              <div className="space-y-3">
-                {modules.map((m, i) => (
-                  <div key={i} className="flex gap-3">
-                    <input
-                      className="flex-1 bg-white border-none rounded-xl px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-100 outline-none"
-                      value={m.title} onChange={e => updateModule(i, 'title', e.target.value)} placeholder="Module"
-                    />
-                    <input
-                      className="flex-[2] bg-white border-none rounded-xl px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-100 outline-none"
-                      value={m.details} onChange={e => updateModule(i, 'details', e.target.value)} placeholder="Details"
-                    />
-                    <button type="button" onClick={() => removeModule(i)} className="text-slate-400 hover:text-red-500 px-1 transition text-lg">&times;</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Tech Stack */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 ml-1">Tech Stack</label>
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
-                {Object.keys(techStack).map((key) => (
-                  <input
-                    key={key}
-                    className="w-full bg-white/50 border border-transparent focus:border-purple-400/50 rounded-xl px-3 py-2 text-center text-sm outline-none focus:ring-2 focus:ring-purple-100 transition-all font-medium placeholder-slate-400 shadow-sm"
-                    value={techStack[key]}
-                    onChange={e => setTechStack({ ...techStack, [key]: e.target.value })}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* Commercials + Payment Terms */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-gradient-to-br from-white to-blue-50/50 p-6 rounded-2xl border border-white shadow-inner">
-
-              {/* Left: Cost */}
-              <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Investment</label>
-                <input
-                  className="w-full bg-white border-none rounded-xl px-4 py-3 mb-3 shadow-sm outline-none font-medium"
-                  value={costItem.name} onChange={e => setCostItem({ ...costItem, name: e.target.value })}
+                <textarea
+                  className="w-full bg-white/50 border border-transparent focus:border-blue-400/50 rounded-xl px-4 py-3 outline-none focus:ring-4 focus:ring-blue-100 transition-all font-medium placeholder-slate-400 min-h-[100px]"
+                  value={scope}
+                  onChange={e => setScope(e.target.value)}
                 />
-                <div className="flex items-center gap-2">
-                  <span className="text-slate-400 font-bold">₹</span>
-                  <input
-                    className="w-full bg-white border-none rounded-xl px-4 py-3 shadow-sm outline-none font-mono font-bold text-lg"
-                    type="number"
-                    value={costItem.price} onChange={e => setCostItem({ ...costItem, price: e.target.value })}
-                  />
-                </div>
-                <div className="mt-3 text-right">
-                  <div className="text-xs text-slate-500 font-medium">GST (18%): ₹{Number(calculateGST()).toLocaleString('en-IN')}</div>
-                  <div className="text-xl font-bold text-slate-800 mt-1">Total: ₹{Number(calculateTotal()).toLocaleString('en-IN')}</div>
-                </div>
               </div>
 
-              {/* Right: Terms */}
-              <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Milestones</label>
+              {/* Modules */}
+              <div className="bg-slate-50/50 rounded-2xl p-6 border border-white/60">
+                <div className="flex justify-between items-center mb-4">
+                  <label className="text-xs font-bold text-slate-400 uppercase tracking-wider">Modules</label>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={generateModules}
+                      className="flex items-center gap-1 text-xs font-bold text-teal-600 bg-teal-50 hover:bg-teal-100 px-3 py-1.5 rounded-lg transition-colors"
+                    >
+                      <span>✨ AI Suggest</span>
+                    </button>
+                    <button type="button" onClick={addModule} className="text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition-colors">
+                      + Add Module
+                    </button>
+                  </div>
+                </div>
                 <div className="space-y-3">
-                  <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
-                    <span className="text-xs font-bold text-blue-600">Advance</span>
-                    <select className="bg-transparent font-bold outline-none text-right cursor-pointer" value={terms.advance} onChange={e => setTerms({ ...terms, advance: Number(e.target.value) })}>
-                      {percentages.map(p => {
-                        const wouldExceed = (p + Number(terms.completion) + Number(terms.delivery)) > 100;
-                        return <option key={p} value={p} disabled={wouldExceed && p !== Number(terms.advance)}>{p}%</option>
-                      })}
-                    </select>
+                  {modules.map((m, i) => (
+                    <div key={i} className="flex gap-3">
+                      <input
+                        className="flex-1 bg-white border-none rounded-xl px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-100 outline-none"
+                        value={m.title} onChange={e => updateModule(i, 'title', e.target.value)} placeholder="Module"
+                      />
+                      <input
+                        className="flex-[2] bg-white border-none rounded-xl px-3 py-2 text-sm shadow-sm focus:ring-2 focus:ring-blue-100 outline-none"
+                        value={m.details} onChange={e => updateModule(i, 'details', e.target.value)} placeholder="Details"
+                      />
+                      <button type="button" onClick={() => removeModule(i)} className="text-slate-400 hover:text-red-500 px-1 transition text-lg">&times;</button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Tech Stack */}
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3 ml-1">Tech Stack</label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
+                  {Object.keys(techStack).map((key) => (
+                    <input
+                      key={key}
+                      className="w-full bg-white/50 border border-transparent focus:border-purple-400/50 rounded-xl px-3 py-2 text-center text-sm outline-none focus:ring-2 focus:ring-purple-100 transition-all font-medium placeholder-slate-400 shadow-sm"
+                      value={techStack[key]}
+                      onChange={e => setTechStack({ ...techStack, [key]: e.target.value })}
+                    />
+                  ))}
+                </div>
+              </div>
+
+              {/* Commercials + Payment Terms */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-gradient-to-br from-white to-blue-50/50 p-6 rounded-2xl border border-white shadow-inner">
+
+                {/* Left: Cost */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Investment</label>
+                  <input
+                    className="w-full bg-white border-none rounded-xl px-4 py-3 mb-3 shadow-sm outline-none font-medium"
+                    value={costItem.name} onChange={e => setCostItem({ ...costItem, name: e.target.value })}
+                  />
+                  <div className="flex items-center gap-2">
+                    <span className="text-slate-400 font-bold">₹</span>
+                    <input
+                      className="w-full bg-white border-none rounded-xl px-4 py-3 shadow-sm outline-none font-mono font-bold text-lg"
+                      type="number"
+                      value={costItem.price} onChange={e => setCostItem({ ...costItem, price: e.target.value })}
+                    />
                   </div>
-                  <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
-                    <span className="text-xs font-bold text-purple-600">Completion</span>
-                    <select className="bg-transparent font-bold outline-none text-right cursor-pointer" value={terms.completion} onChange={e => setTerms({ ...terms, completion: Number(e.target.value) })}>
-                      {percentages.map(p => {
-                        const wouldExceed = (p + Number(terms.advance) + Number(terms.delivery)) > 100;
-                        return <option key={p} value={p} disabled={wouldExceed && p !== Number(terms.completion)}>{p}%</option>
-                      })}
-                    </select>
+                  <div className="mt-3 text-right">
+                    <div className="text-xs text-slate-500 font-medium">GST (18%): ₹{Number(calculateGST()).toLocaleString('en-IN')}</div>
+                    <div className="text-xl font-bold text-slate-800 mt-1">Total: ₹{Number(calculateTotal()).toLocaleString('en-IN')}</div>
                   </div>
-                  <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
-                    <span className="text-xs font-bold text-teal-600">Delivery</span>
-                    <select className="bg-transparent font-bold outline-none text-right cursor-pointer" value={terms.delivery} onChange={e => setTerms({ ...terms, delivery: Number(e.target.value) })}>
-                      {percentages.map(p => {
-                        const wouldExceed = (p + Number(terms.advance) + Number(terms.completion)) > 100;
-                        return <option key={p} value={p} disabled={wouldExceed && p !== Number(terms.delivery)}>{p}%</option>
-                      })}
-                    </select>
+                </div>
+
+                {/* Right: Terms */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Milestones</label>
+                  <div className="space-y-3">
+                    <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
+                      <span className="text-xs font-bold text-blue-600">Advance</span>
+                      <select className="bg-transparent font-bold outline-none text-right cursor-pointer" value={terms.advance} onChange={e => setTerms({ ...terms, advance: Number(e.target.value) })}>
+                        {percentages.map(p => {
+                          const wouldExceed = (p + Number(terms.completion) + Number(terms.delivery)) > 100;
+                          return <option key={p} value={p} disabled={wouldExceed && p !== Number(terms.advance)}>{p}%</option>
+                        })}
+                      </select>
+                    </div>
+                    <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
+                      <span className="text-xs font-bold text-purple-600">Completion</span>
+                      <select className="bg-transparent font-bold outline-none text-right cursor-pointer" value={terms.completion} onChange={e => setTerms({ ...terms, completion: Number(e.target.value) })}>
+                        {percentages.map(p => {
+                          const wouldExceed = (p + Number(terms.advance) + Number(terms.delivery)) > 100;
+                          return <option key={p} value={p} disabled={wouldExceed && p !== Number(terms.completion)}>{p}%</option>
+                        })}
+                      </select>
+                    </div>
+                    <div className="flex justify-between items-center bg-white/60 px-3 py-2 rounded-lg">
+                      <span className="text-xs font-bold text-teal-600">Delivery</span>
+                      <select className="bg-transparent font-bold outline-none text-right cursor-pointer" value={terms.delivery} onChange={e => setTerms({ ...terms, delivery: Number(e.target.value) })}>
+                        {percentages.map(p => {
+                          const wouldExceed = (p + Number(terms.advance) + Number(terms.completion)) > 100;
+                          return <option key={p} value={p} disabled={wouldExceed && p !== Number(terms.delivery)}>{p}%</option>
+                        })}
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            <div className="flex gap-4">
-              <button type="submit" className="flex-1 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  <span>Previews PDF</span>
-                  <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
-                </span>
-              </button>
+              <div className="flex gap-4">
+                <button type="submit" className="flex-1 py-4 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    <span>Previews PDF</span>
+                    <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                  </span>
+                </button>
 
-              <button
-                type="button"
-                onClick={handleSendEmail}
-                disabled={loading}
-                className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 relative overflow-hidden group"
-              >
-                <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                <span className="relative z-10 flex items-center justify-center gap-2">
-                  {loading ? 'Sending...' : 'Send to Client'}
-                  <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                </span>
-              </button>
-            </div>
+                <button
+                  type="button"
+                  onClick={handleSendEmail}
+                  disabled={loading}
+                  className="flex-1 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl shadow-xl hover:shadow-2xl transition-all transform hover:-translate-y-1 relative overflow-hidden group"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    {loading ? 'Sending...' : 'Send to Client'}
+                    <svg className="w-5 h-5 text-white/80" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                  </span>
+                </button>
+              </div>
 
-          </form>
+            </form>
+          </div>
         </div>
-      </div>
 
-      {/* CSS Animations (Inline for simplicity) */}
-      <style jsx global>{`
+        {/* CSS Animations (Inline for simplicity) */}
+        <style jsx global>{`
         @keyframes blob {
             0% { transform: translate(0px, 0px) scale(1); }
             33% { transform: translate(30px, -50px) scale(1.1); }
@@ -648,6 +618,7 @@ export default function Home() {
             100% { transform: translateY(0px); }
         }
       `}</style>
+      </div>
     </div>
   );
 }
